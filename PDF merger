@@ -1,0 +1,151 @@
+from abc import abstractproperty
+from tkinter import *
+from tkinter import ttk
+from tkinter import filedialog
+from openpyxl import Workbook
+import openpyxl
+from openpyxl.reader.excel import load_workbook
+from openpyxl.styles import Font
+from tkinter import messagebox
+import os
+from PyPDF2 import PdfFileMerger
+
+
+root = Tk()
+options=["RA","RU"]
+label_value = "folder path"
+chimbi2=DISABLED
+chimbi=DISABLED
+label_value2="Output folder path"
+
+
+e=Entry(root,width=80)
+e.insert(0,label_value)
+e.grid(row=0,column=0, padx=10, pady=10)
+e.config(state=DISABLED)
+
+
+
+
+def on_click():
+    global label_value, chimbi,chu
+    root.filename=filedialog.askopenfilename(filetypes=(("Excel files",".xlsx .xls .xlsm .xlsb"),("all files","*.*")))
+    label_value = root.filename
+    # label1 =Label(root,text=label_value,padx=0,pady=5,height=3)
+    # label1.grid(row=0,column=0)
+    e=Entry(root,width=80)
+    e.insert(0,label_value)
+    e.grid(row=0,column=0,padx=10, pady=10 )
+    e.config(state=DISABLED)
+    
+
+
+def chu_1(event):
+    global chimbi2
+    chu=myCombo.get()
+    if chu!="":
+        chimbi2=ACTIVE
+        # bt1=Button(root,padx=5,pady=0,text="Select File",command = on_click,state=chimbi2)
+        # bt1.grid(row=0,column=1,padx=1, pady=10)
+        bt1.config(state=chimbi2)
+
+myCombo=ttk.Combobox(root, values=options,width=10)
+myCombo.bind("<<ComboboxSelected>>",chu_1)
+myCombo.grid(row=0,column=2)
+
+def Create_Excel():
+    Wb = Workbook()
+    sheet=Wb.active
+    font_style= Font(bold=True)
+    sheet["A1"]="Company Name"
+    sheet["A1"].font=font_style
+    sheet["B1"]="Main Pdf"
+    sheet["B1"].font=font_style
+    sheet["C1"]="Pdf to be inserted"
+    sheet["C1"].font=font_style
+    chu = os.path.exists("C:/Users/shivr/Downloads/template.xlsx")
+    if chu== True:
+        messagebox.showinfo(title="Hi",message="Template already exists in : C:/Users/shivr/Downloads/") 
+    else:    
+        Wb.save("C:/Users/shivr/Downloads/template.xlsx")
+        messagebox.showinfo(title="Hi",message="Template saved in : C:/Users/shivr/Downloads/ ")
+
+
+
+def Select_output_F():
+    global label_value2
+    foldername=filedialog.askdirectory()
+    label_value2=foldername
+    chu = os.path.exists(label_value2)
+    if chu==TRUE:
+        print(foldername)
+        chimbi=ACTIVE
+        # bt3=Button(root,padx=0,pady=0,text="Merge Pdfs",command = Merge_Pdf, state=chimbi)
+        # bt3.grid(row=1,column=2,padx=0, pady=10)
+        bt3.config(state=chimbi)
+        e1=Entry(root,width=80)
+        e1.insert(0,label_value2)
+        e1.grid(row=1,column=0, padx=10, pady=10)
+        e1.config(state=DISABLED)
+
+def Merge_Pdf():
+    global label_value , chimbi2,chimbi ,label_value2
+    Wb = load_workbook(label_value)
+    Ws=Wb.active
+    V1= Ws["A"]
+    V2=Ws["B"]
+    V3=Ws["C"]
+    
+    Row_len=len(V2)
+    for i in range(1,Row_len):
+        merger=PdfFileMerger()
+        merger.append(V2[i].value)
+        merger.append(V3[i].value)
+        merger.write(label_value2+"/"+V1[i].value+".pdf")
+        merger.close
+    messagebox.showinfo(title="Hi",message="PDFs are merged")
+
+    label_value = "folder path"
+    chimbi2=DISABLED
+    chimbi=DISABLED
+    label_value2="Output folder path"
+    bt1.config(state=chimbi2)
+    bt3.config(state=chimbi)
+
+    # for cell in V2:
+    #     for cell in V3
+    #         if cell== V2[0]:
+    #             continue
+    #         else:  
+    #             merger.append(cell.value)
+    #             print(cell.value)
+    #             merger.write("C:/Users/shivr/Downloads/Conso.pdf")
+
+root.title("PDF Merger")
+root.geometry("860x100")
+
+
+
+e1=Entry(root,width=80)
+e1.insert(0,"Seledt Output folder")
+e1.grid(row=1,column=0, padx=10, pady=10)
+e1.config(state=DISABLED)
+
+
+# label1 =Label(root,text=label_value,padx=240,pady=5,height=3)
+# label1.grid(row=0,column=0)
+
+bt1=Button(root,padx=30,pady=0,text="Select File",command = on_click,state=chimbi2)
+bt1.grid(row=0,column=1,padx=1, pady=10)
+
+bt3=Button(root,padx=9,pady=0,text="Merge Pdfs",command = Merge_Pdf, state=chimbi)
+bt3.grid(row=1,column=2,padx=0, pady=1)
+
+
+bt2=Button(root,padx=0,pady=25,text="Download template",command = Create_Excel)
+bt2.grid(row=0,column=3,padx=5, pady=10,rowspan=2)
+
+bt4=Button(root,padx=5,pady=0,text="Select output Folder",command = Select_output_F)
+bt4.grid(row=1,column=1,padx=10, pady=10)
+
+root.mainloop()
