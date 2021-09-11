@@ -1,4 +1,4 @@
-from abc import abstractproperty
+
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
@@ -111,7 +111,7 @@ def Merge_Pdf():
     label_value2="Output folder path"
     bt1.config(state=chimbi2)
     bt3.config(state=chimbi)
-
+    myCombo.set("")
     # for cell in V2:
     #     for cell in V3
     #         if cell== V2[0]:
